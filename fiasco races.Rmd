@@ -119,7 +119,10 @@ race_html_data <- lapply(data_files, getRaceHTMLData)
 
 race_data <- lapply(race_html_data, dataCleansing)
 race_data <- purrr::map2_dfr(.x = race_html_data, .y = c(1,2,4,5), .f = dataCleansing) %>%
-  mutate(Rider_ID = as.numeric(as.factor(Rider)))
+  mutate(Rider_ID = as.numeric(as.factor(Rider))) %>%
+  group_by(Rider_ID) %>%
+  mutate(Worst_Result = max(Position),
+         Best_Result = min(Position))
 
 ```
 
@@ -129,10 +132,38 @@ race_data <- purrr::map2_dfr(.x = race_html_data, .y = c(1,2,4,5), .f = dataClea
 This document summarizes various data-related observations from Round 1 of Americas East Open Division 1 - C category.  The dataset includes all races except Race 3 - the team time trial race.  All data was collected from Zwift Power.
 
 
-## Rider Results
-The below graph shows the finishing positions of different riders (the rider IDs have been anonymized).  It's interesting that almost none of the riders placed consistently in the top 10, or even top 20. The ones that tended to only ride a couple races.  Many riders had a very wide range of results.  It does not appear to be uncommon for a rider to get in the top 5 in one race and 50th+ in another. 
+## Rider Participation
+Below is the distribution of number races competed in by rider.  There were `r length(unique(race_data$Rider_ID))` riders.  No rider competed in all 5 of 5 races.
 
-```{r rider_results, echo=FALSE, message=FALSE, fig.dim = c(12, 16)}
+``` {r group_results, echo=FALSE, message=FALSE}
+d <- race_data %>%
+  dplyr::select(Rider_ID) %>%
+  dplyr::group_by(Rider_ID) %>%
+  dplyr::summarize(Race_Count = n())
+
+p <- ggplot(data = d, aes(x = Race_Count)) +
+  geom_bar(fill = "orange") +
+  theme_pubclean()
+
+rm(d)
+  
+plotly::ggplotly(p)
+```
+
+
+## Rider Results
+```{r top_20, echo = FALSE}
+riders_always_top_20 <- race_data %>% 
+  dplyr::select(Rider_ID, Worst_Result) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(Worst_Result <= 20)
+
+num_riders_always_top_20 <- nrow(riders_always_top_20)
+```
+
+The below Cleveland plot shows the finishing positions of different riders (the rider IDs have been anonymized).  It's interesting that almost none of the riders placed consistently in the top 10, or even top 20. The ones that tended to only do a couple races.  Many riders had a very wide range of results.  It does not appear to be uncommon for a rider to get in the top 5 in one race and 50th+ in another. Of the `r length(unique(race_data$Rider_ID))` riders, only `r num_riders_always_top_20` placed in the top 20 or better in each other their races.  *Appologies for the long plot, but there's a lot of data to display - there are interactive tools to zoom and filter by race in the top right.*
+
+```{r rider_results, echo=FALSE, message=FALSE, fig.dim = c(12, 30)}
 
 p <- ggdotchart(
   data = race_data %>% mutate(Race_Number = as.factor(Race_Number)),
@@ -153,21 +184,65 @@ plotly::ggplotly(p)
 
 ```
 
+## Changes in Weight
+Not presented here for the sake of space, but a quick check was done on the change in weight riders reported across their races.  It does not appear as though there were any suspcious 'jumps' in weight.  I had thought with the 50% rule, that some riders might lower their weights after the 3rd race to get a boost without triggering the 3.2 ceiling rule.  This does not appear to be the case.
 
-## Rider Participation
-Below is the distribution of number races competed in by rider.  No rider competed in all 5 of 5 races.
 
-``` {r group_results, echo=FALSE, message=FALSE}
-d <- race_data %>%
-  dplyr::select(Rider_ID) %>%
-  dplyr::group_by(Rider_ID) %>%
-  dplyr::summarize(Race_Count = n())
+## Characteristics of the Top 20
 
-p <- ggplot(data = d, aes(x = Race_Count)) +
-  geom_bar(fill = "orange") +
-  theme_pubclean()
+```{r random_forest_1, echo=FALSE, message=FALSE}
+race_model_data <- race_data %>%
+  select(-Round, -Race_Number, -Cat, -Rider, -Position, -Normalized_W, 
+         -Normalized_WKG, -Time, -Rel_Time, -Best_Result, -Worst_Result) %>%
+  na.omit()
 
-rm(d)
-  
-plotly::ggplotly(p)
+set.seed(100)
+train <- sample(1:nrow(race_model_data), size = round(0.75*nrow(race_model_data)))
+train_data <- race_model_data[train,]
+test_data <- race_model_data[-train,]
+
+rf_race <- randomForest(Top_20~., data = train_data)
+
+#check training prediction
+train_predict <- predict(rf_race,train_data)
+#confusionMatrix(train_predict, train_data$Top_20)
+
+test_predict <- predict(rf_race, test_data)
+
 ```
+
+For each race, riders were grouped into whether or not they finished in the top 20.  A random sample of `r nrow(train_data)` results was used to train a random forest model.  Only "targetable" explanatory variables were used (i.e. Normailzaed W/Kg is not something a rider can directly target so it was excluded).  The model was used to predict the whether the remaining `r nrow(test_data)` results would be a top 20 finish.  The model had an overal predictive accuracy of `r confusionMatrix(test_predict, test_data$Top_20)$overall['Accuracy']`.  
+
+
+```{r random_forest_2, echo=FALSE, message=FALSE}
+confusionMatrix(test_predict, test_data$Top_20)
+
+#plot(rf_race)
+
+```
+
+
+The same model approach was used to identify Top 10, Top 30, Top 40.  The model's predictive power declined from Top 10 to Top 40, which suggests that the relative difference in rider power profiles between the someone who is 15th versus 25th is more different than a rider that finishes 35th versus a rider that finishes 50th.  The Top 20 group was chosen as a 'good balance'.  The goal isn't necessarily to answer the question: "How do I get in the top 20?", rather it's "What are the metrics can I target in my training that will give me the best returns?".  The top 10 variables are shown below:
+
+
+```{r random_forest_3, echo=FALSE, message=FALSE}
+varImpPlot(rf_race,
+           sort = T,
+           n.var = 10,
+           main = "Top 10 - Variable Importance")
+```
+
+We can see that short-term W/Kg is carries substancially more importance than the other variables.  Taking a deeper look into the top 4 variables:
+
+
+
+```{r random_forest_4, echo=FALSE, message=FALSE}
+
+par(mfrow = c(2,2))
+partialPlot(x = rf_race, pred.data = as.data.frame(train_data), x.var = WKG_15s, which.class = "Yes")
+partialPlot(x = rf_race, pred.data = as.data.frame(train_data), x.var = WKG_30s, which.class = "Yes")
+partialPlot(x = rf_race, pred.data = as.data.frame(train_data), x.var = WKG_1m, which.class = "Yes")
+partialPlot(x = rf_race, pred.data = as.data.frame(train_data), x.var = Avg_WKG, which.class = "Yes")
+```
+
+It's interesting that the importance of these variables is very non-linear.  For the 30s W/Kg, it only contributes to improving your odds of getting in the top 20 if you have a value of more than 5.  
