@@ -2,7 +2,9 @@
 title: "Fiasco Races Round 1 - Data Analysis"
 author: "Greg Sward"
 date: "2022-10-19"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +20,7 @@ library(lubridate)
 library(party)
 library(purrr)
 library(randomForest)
+library(reactable)
 library(rvest)
 library(stringr)
 library(tree)
@@ -129,7 +132,7 @@ race_data <- purrr::map2_dfr(.x = race_html_data, .y = c(1,2,4,5), .f = dataClea
 
 ## Data and Background
 
-This document summarizes various data-related observations from Round 1 of Americas East Open Division 1 - C category.  The dataset includes all races except Race 3 - the team time trial race.  All data was collected from Zwift Power.
+This document summarizes various data-related observations from Round 1 of Americas East Open Division 1 - C category.  The data set includes all races except Race 3 - the team time trial race.  All data was collected from Zwift Power.
 
 
 ## Rider Participation
@@ -161,7 +164,7 @@ riders_always_top_20 <- race_data %>%
 num_riders_always_top_20 <- nrow(riders_always_top_20)
 ```
 
-The below Cleveland plot shows the finishing positions of different riders (the rider IDs have been anonymized).  It's interesting that almost none of the riders placed consistently in the top 10, or even top 20. The ones that tended to only do a couple races.  Many riders had a very wide range of results.  It does not appear to be uncommon for a rider to get in the top 5 in one race and 50th+ in another. Of the `r length(unique(race_data$Rider_ID))` riders, only `r num_riders_always_top_20` placed in the top 20 or better in each other their races.  *Appologies for the long plot, but there's a lot of data to display - there are interactive tools to zoom and filter by race in the top right.*
+The below Cleveland plot shows the finishing positions of different riders (the rider IDs have been anonymized).  It's interesting that almost none of the riders placed consistently in the top 10, or even top 20. The ones that tended to only do a couple races.  Many riders had a very wide range of results.  It does not appear to be uncommon for a rider to get in the top 5 in one race and 50th+ in another. Of the `r length(unique(race_data$Rider_ID))` riders, only `r num_riders_always_top_20` placed in the top 20 or better in each other their races.  *Apologies for the long plot, but there's a lot of data to display - there are interactive tools to zoom and filter by race in the top right.*
 
 ```{r rider_results, echo=FALSE, message=FALSE, fig.dim = c(12, 30)}
 
@@ -185,15 +188,168 @@ plotly::ggplotly(p)
 ```
 
 ## Changes in Weight
-Not presented here for the sake of space, but a quick check was done on the change in weight riders reported across their races.  It does not appear as though there were any suspcious 'jumps' in weight.  I had thought with the 50% rule, that some riders might lower their weights after the 3rd race to get a boost without triggering the 3.2 ceiling rule.  This does not appear to be the case.
+Not presented here for the sake of space, but a quick check was done on the change in weight riders reported across their races.  It does not appear as though there were any suspicious 'jumps' in weight.  I had thought with the 50% rule, that some riders might lower their weights after the 3rd race to get a boost without triggering the 3.2 ceiling rule.  This does not appear to be the case.
 
+
+## Rider Finishing Position Points
+The finishing points for the riders was calculated and is summarized below.
+```{r rider_points, echo=FALSE, message=FALSE}
+getPoints <- function(position){
+  if(position == 1){
+    40
+  }else if(position == 2){
+    35
+  }else if(position == 3){
+    30
+  }else if(position == 4){
+    29
+  }else if(position == 5){
+    28
+  }else if(position == 6){
+    27
+  }else if(position == 7){
+    26
+  }else if(position == 8){
+    25
+  }else if(position == 9){
+    24
+  }else if(position == 10){
+    23
+  }else if(position <= 15){
+    20
+  }else if(position <= 20){
+    19
+  }else if(position <= 25){
+    18
+  }else if(position <= 30){
+    17
+  }else if(position <= 35){
+    16
+  }else if(position <= 40){
+    15
+  }else if(position <= 45){
+    14
+  }else if(position <= 50){
+    13
+  }else if(position <= 53){
+    12
+  }else if(position <= 56){
+    11
+  }else if(position <= 59){
+    10
+  }else if(position <= 62){
+    9
+  }else if(position <= 65){
+    8
+  }else if(position <= 68){
+    7
+  }else if(position <= 71){
+    6
+  }else if(position <= 74){
+    5
+  }else if(position <= 77){
+    4
+  }else if(position <= 80){
+    3
+  }else if(position <= 83){
+    2
+  }else{
+    1
+  }
+}
+
+getPosition <- function(points){
+  if(points == 40){
+    1
+  }else if(points == 35){
+    2
+  }else if(points == 30){
+    3
+  }else if(points == 29){
+    4
+  }else if(points == 28){
+    5
+  }else if(points == 27){
+    6
+  }else if(points == 26){
+    7
+  }else if(points == 25){
+    8
+  }else if(points == 24){
+    9
+  }else if(points == 23){
+    10
+  }else if(points >= 20){
+    15
+  }else if(points >= 19){
+    20
+  }else if(points >= 18){
+    25
+  }else if(points >= 17){
+    30
+  }else if(points >= 16){
+    35
+  }else if(points >= 15){
+    40
+  }else if(points >= 14){
+    45
+  }else if(points >= 13){
+    50
+  }else if(points >= 12){
+    53
+  }else if(points >= 11){
+    56
+  }else if(points >= 10){
+    59
+  }else if(points >= 9){
+    62
+  }else if(points >= 8){
+    65
+  }else if(points >= 7){
+    68
+  }else if(points >= 6){
+    71
+  }else if(points >= 5){
+    74
+  }else if(points >= 4){
+    77
+  }else if(points >= 3){
+    80
+  }else if(points >= 2){
+    83
+  }else{
+    85
+  }
+}
+
+race_data$Finish_Points <- purrr::map_dbl(race_data$Position, getPoints)
+
+points_data <- race_data %>%
+  group_by(Rider_ID) %>%
+  summarise(Num_Races = n(), 
+            Total_Finish_Pts = sum(Finish_Points), 
+            Avg_Finish_Pts_Per_Race = round(Total_Finish_Pts/Num_Races, 2))
+
+points_data$Equivalent_Avg_Position <- purrr::map_dbl(points_data$Avg_Finish_Pts_Per_Race, getPosition)
+
+points_data <- points_data %>% dplyr::arrange(-Total_Finish_Pts)
+
+reactable::reactable(
+  data = points_data, 
+  resizable = TRUE, 
+  searchable = TRUE, 
+  showPageSizeOptions = TRUE,
+  showSortable = TRUE,
+  striped = TRUE,
+  pageSizeOptions = c(10, 50, 100, 200))
+```
 
 ## Characteristics of the Top 20
 
 ```{r random_forest_1, echo=FALSE, message=FALSE}
 race_model_data <- race_data %>%
   select(-Round, -Race_Number, -Cat, -Rider, -Rider_ID, -Position, -Normalized_W, 
-         -Normalized_WKG, -Time, -Rel_Time, -Best_Result, -Worst_Result) %>%
+         -Normalized_WKG, -Time, -Rel_Time, -Best_Result, -Worst_Result, -Finish_Points) %>%
   na.omit()
 
 set.seed(100)
@@ -211,7 +367,7 @@ test_predict <- predict(rf_race, test_data)
 
 ```
 
-For each race, riders were grouped into whether or not they finished in the top 20.  A random sample of `r nrow(train_data)` results was used to train a random forest model.  Only "targetable" explanatory variables were used (i.e. Normailzaed W/Kg is not something a rider can directly target so it was excluded).  The model was used to predict the whether the remaining `r nrow(test_data)` results would be a top 20 finish.  The model had an overal predictive accuracy of `r confusionMatrix(test_predict, test_data$Top_20)$overall['Accuracy']`.  
+For each race, riders were grouped into whether or not they finished in the top 20.  A random sample of `r nrow(train_data)` results was used to train a random forest model.  Only "targetable" explanatory variables were used (i.e. Normalized W/Kg is not something a rider can directly target so it was excluded).  The model was used to predict the whether the remaining `r nrow(test_data)` results would be a top 20 finish.  The model had an overall predictive accuracy of `r confusionMatrix(test_predict, test_data$Top_20)$overall['Accuracy']`.  
 
 
 ```{r random_forest_2, echo=FALSE, message=FALSE}
@@ -234,7 +390,7 @@ random_forest_variable_importance <- varImpPlot(rf_race,
 random_forest_variable_importance
 ```
 
-We can see that short-term W/Kg is carries substancially more importance than the other variables.  Taking a deeper look into the top 4 variables:
+We can see that short-term W/Kg is carries substantially more importance than the other variables.  Taking a deeper look into the top 4 variables:
 
 
 
