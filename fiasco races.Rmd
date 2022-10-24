@@ -192,7 +192,7 @@ Not presented here for the sake of space, but a quick check was done on the chan
 
 ```{r random_forest_1, echo=FALSE, message=FALSE}
 race_model_data <- race_data %>%
-  select(-Round, -Race_Number, -Cat, -Rider, -Position, -Normalized_W, 
+  select(-Round, -Race_Number, -Cat, -Rider, -Rider_ID, -Position, -Normalized_W, 
          -Normalized_WKG, -Time, -Rel_Time, -Best_Result, -Worst_Result) %>%
   na.omit()
 
@@ -226,10 +226,12 @@ The same model approach was used to identify Top 10, Top 30, Top 40.  The model'
 
 
 ```{r random_forest_3, echo=FALSE, message=FALSE}
-varImpPlot(rf_race,
+random_forest_variable_importance <- varImpPlot(rf_race,
            sort = T,
            n.var = 10,
            main = "Top 10 - Variable Importance")
+
+random_forest_variable_importance
 ```
 
 We can see that short-term W/Kg is carries substancially more importance than the other variables.  Taking a deeper look into the top 4 variables:
@@ -246,3 +248,27 @@ partialPlot(x = rf_race, pred.data = as.data.frame(train_data), x.var = Avg_WKG,
 ```
 
 It's interesting that the importance of these variables is very non-linear.  For the 30s W/Kg, it only contributes to improving your odds of getting in the top 20 if you have a value of more than 5.  
+
+While not having the predictive power of a random forest, a simple classification tree model was run on the same data set.  The model shows that riders who have a 30s W/Kg of > 5.9 and a Avg W/Kg of > 2.6 have a slightly greater than 50% chance of finishing in the top 20.  Riders who have less than 5.9 30S W/Kg can improve their odds of finishing in the top 20 by having an Avg W/Kg of > 3.1.  This helps to give additional context to the importance of short-term power and recovery that was illustrated in the random forest model.
+
+
+```{r echo=FALSE, message=FALSE}
+# f <- as.formula(paste("Top_20 ~", paste(rownames(random_forest_variable_importance), collapse = " + ")))
+# f2 <- as.formula("Top_20 ~ Avg_WKG + WKG_1m + WKG_30s + WKG_15s")
+ctree_race <- ctree(formula = Top_20~., data = train_data)
+
+#check training prediction
+train_predict <- predict(ctree_race,train_data,type="response")
+#table(train_predict,train_data$Top_20)
+#mean(train_predict != train_data$Top_20) * 100
+
+test_predict <- predict(ctree_race, test_data, type="response")
+#table(test_predict,test_data$Top_20)
+#mean(test_predict != test_data$Top_20) * 100
+plot(ctree_race)
+
+```
+
+
+
+
