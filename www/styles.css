@@ -1,0 +1,9 @@
+table.dataTable.display.dark-mode tbody {
+  background-color: #343a40;
+  color: #ffffff;
+}
+
+table.dataTable.display.dark-mode thead th {
+  background-color: #495057;
+  color: #ffffff;
+}
