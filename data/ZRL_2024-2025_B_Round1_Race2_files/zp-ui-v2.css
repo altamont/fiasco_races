@@ -1,0 +1,240 @@
+@font-face {
+    font-family: "ZwiftSprint-Regular";
+    src: url("https://zwift-web-static.s3.amazonaws.com/fonts/ZwiftSprint-Regular.woff") format("woff");
+}
+@font-face {
+    font-family: "ZwiftSprint-Medium";
+    src: url("https://zwift-web-static.s3.amazonaws.com/fonts/ZwiftSprint-Medium.woff") format("woff");
+}
+@font-face {
+    font-family: "ZwiftSprint-Black";
+    src: url("https://zwift-web-static.s3.amazonaws.com/fonts/ZwiftSprint-Black.woff") format("woff");
+}
+@font-face {
+    font-family: "ZwiftSprint-Bold";
+    src: url("https://zwift-web-static.s3.amazonaws.com/fonts/ZwiftSprint-Bold.woff") format("woff");
+}
+
+body {
+    font-family: ZwiftSprint-Regular,Helvetica,Roboto,sans-serif;
+    font-size: 15px;
+    color: #333;
+    background-color: #d3d3d3 !important;
+}
+h4 {
+    font-size: 18px;
+}
+
+/** Navbars */
+.navbar-inverse .navbar-nav > li > a {
+    color: #eee;
+    font-size: 17px;
+}
+.navbar-inverse .navbar-nav > li > a {
+    color: #eee;
+    font-size: 16px;
+    height: 60px;
+    padding: 21px 15px;
+}
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus {
+    background-color: #0093d1 !important;
+}
+.nav > li > a {
+    padding: 13px 16px 12px;
+}
+
+.collapse navbar-collapse pull-left-desktop {
+    padding-top: 5px;
+}
+.panel-blue > .panel-heading {
+    color: #222;
+    background-color: #e0e0e4;
+}
+.panel-blue > #event_info_head.panel-heading {
+    background-color: #0093d1;
+}
+.panel-green > .panel-heading {
+    color: #fff;
+    background-color: #fa6619;
+}
+.sub_pill .active a {
+    background-color: #0093d1 !important;
+    color: #eee !important;
+}
+.sub_pill a:hover {
+    background-color: #0093d1 !important;
+    color: #eee !important;
+}
+.timezone-select {
+    padding: 0 5px;
+}
+#user-menu {
+    padding-top: 5px;
+}
+/** Tables */
+table.dataTable {
+    padding-top: 20px !important;
+}
+table.dataTable td, table.dataTable th {
+    padding: 10px 6px !important;
+    border-top: none !important;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: transparent;
+}
+#zwift_event_list > tbody > tr > td {
+    border-bottom: none !important;
+    line-height: 1.5;
+}
+div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+    margin: 5px 5px !important;
+}
+.dataTables_wrapper {
+    margin: 15px !important;
+}
+table.dataTable thead>tr>th.sorting_asc, table.dataTable thead>tr>th.sorting_desc,
+table.dataTable thead>tr>th.sorting, table.dataTable thead>tr>td.sorting_asc,
+table.dataTable thead>tr>td.sorting_desc, table.dataTable thead>tr>td.sorting {
+    padding-right: 30px !important;
+}
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:after {
+    bottom: 12px !important;
+}
+table.dataTable.table-condensed .sorting:after,
+table.dataTable.table-condensed .sorting_asc:after,
+table.dataTable.table-condensed .sorting_desc:after {
+    top: 14px !important;
+}
+table.dataTable thead>tr>th {
+    font-family: ZwiftSprint-Regular, sans-serif;
+    font-size: 14px;
+}
+/** Panels */
+#rinfo_body > .panel-heading > span {
+    font-size: larger;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.panel-max-width {
+    margin-bottom: 0 !important;
+}
+/** Toolbars */
+.btn-toolbar > .btn-group-sm {
+    padding: 5px;
+}
+#columnFilter {
+    padding: 5px;
+}
+
+/** Menus */
+.grey_pill a:hover {
+    background-color: #0093d1 !important;
+    color: #eee !important;
+}
+
+/** Buttons and Links */
+a {
+    color: #0093d1;
+}
+a.no_under:hover, a.no_under:focus {
+    color: #fa6619 !important;
+}
+.btn-primary {
+    color: #fff;
+    background-color: #0093d1;
+    border-color: #0093d1;
+}
+
+.btn-warning {
+    color: #fff;
+    background-color: #fa6619;
+    border-color: #fa6619;
+}
+.btn-warning:hover,
+.btn-warning:focus{
+    color: #fff;
+    background-color: #0093d1;
+    border-color: #0093d1;
+}
+.label-custom {
+    font-family: ZwiftSprint-Medium, Helvetica, sans-serif;
+    font-size: 0.8em;
+}
+.event_filter_results,
+.event_display_filter,
+.event_display_rankings {
+    font-size: larger;
+    text-transform: uppercase;
+}
+/* Adding a few extra pixels to top padding because of new font */
+.btn-sm,
+.btn-group-sm > .btn {
+    padding-top: 8px;
+}
+.btn-xs,
+.btn-group-xs > .btn
+{
+    padding-top: 3px;
+}
+/** Misc */
+#back-to-top {
+    right: 10px;
+}
+#event_info_head {
+    color: #eee;
+    height: 45px;
+}
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+    background-color: #0093d1;
+    border-color: #0093d1;
+}
+.pagination > li > a, .pagination > li > span {
+    line-height: 1.6;
+}
+#friends_riders_wrapper,
+#followers_riders_wrapper {
+    font-size: small;
+}
+.tz_select {
+    margin-top: 5px;
+}
+.progress-bar {
+    padding-top: 1px;
+}
+/** Mobile specific */
+@media (max-width: 768px) {
+    body {
+        margin: 0 !important;
+        font-size: 13px;
+    }
+    .navbar-right {
+        padding-top: 5px;
+    }
+    table.dataTable td, table.dataTable th {
+        padding: 8px 4px !important;
+    }
+    .dataTables_wrapper {
+        margin: 0 !important;
+    }
+    .search_align_top,
+    .search_align_top2 {
+        position: inherit !important;
+    }
+
+    #search-menu-btn, #user-menu-btn, #notification-menu-btn {
+        color: #fff;
+    }
+    #search-menu-btn {
+        display: none;
+    }
+}
