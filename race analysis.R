@@ -54,6 +54,7 @@ dataCleansing <- function(x, race_number = 0,  nrow_to_remove = 0){
     mutate(
       Round = 1,
       Race_Number = race_number,
+      Top_10 = as.factor(ifelse(Position <= 10, "Yes", "No")),
       Top_20 = as.factor(ifelse(Position <= 20, "Yes", "No")),
       Normalized_WKG = round(Normalized_W / Weight, 2)
     ) %>%
@@ -63,6 +64,7 @@ dataCleansing <- function(x, race_number = 0,  nrow_to_remove = 0){
       Cat,
       Rider,
       Position,
+      Top_10,
       Top_20,
       Time,
       Rel_Time,
@@ -89,11 +91,12 @@ dataCleansing <- function(x, race_number = 0,  nrow_to_remove = 0){
 }
 
 data_files <- list(
-  "ZRL_Race_1.html",
-  "ZRL_Race_2.html",
-  # "ZRL_Race_3.html",
-  "ZRL_Race_4.html",
-  "ZRL_Race_5.html")
+  #"ZRL_Race_1.html",
+  #"ZRL_Race_2.html",
+  #"ZRL_Race_3.html",
+  #"ZRL_Race_4.html",
+  #"ZRL_Race_5.html",
+  "ZRL_2024-2025_B_Round1_Race2.html")
 
 getRaceHTMLData <- function(x){
   read_html(paste0("data/", x)) %>%
@@ -104,7 +107,8 @@ getRaceHTMLData <- function(x){
 race_html_data <- lapply(data_files, getRaceHTMLData)
 
 race_data <- lapply(race_html_data, dataCleansing)
-race_data <- purrr::map2_dfr(.x = race_html_data, .y = c(1,2,4,5), .f = dataCleansing)
+race_data <- purrr::map2_dfr(.x = race_html_data, .y = c(1), .f = dataCleansing)
+
 
 race_model_data <- race_data %>%
   select(-Round, -Race_Number, -Cat, -Rider, -Position, -Normalized_W, -Normalized_WKG, -Time, -Rel_Time) %>%
