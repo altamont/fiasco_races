@@ -41,7 +41,7 @@ ui <- fluidPage(
                 checkboxGroupInput(
                   inputId = "metrics",
                   label = "Select Power Metrics:",
-                  choices = c("WKG", "WKG_20m", "WKG_5m", "WKG_1m", "WKG_30s", "WKG_15s"),
+                  choices = c("Avg_WKG", "WKG_20m", "WKG_5m", "WKG_1m", "WKG_30s", "WKG_15s"),
                   selected = c("WKG", "WKG_20m", "WKG_5m")
                 ),
                 width = 12  # Adjust to fit the custom layout
@@ -51,6 +51,7 @@ ui <- fluidPage(
               mainPanel(
                 tabsetPanel(
                   tabPanel("Correlation Plot", plotly::plotlyOutput("correlation_plot")),
+                  tabPanel("Goodness-of-Fit Plot", plotOutput("goodness_of_fit_plot")),
                   tabPanel("Correlation Table", DTOutput("correlation_table")),
                   tabPanel("Data Table", DT::DTOutput("data_table"))
                 ),

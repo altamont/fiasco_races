@@ -158,9 +158,58 @@ server <- function(input, output, session) {
   })
   
   
-  observe({
-    cat("Column names in adjusted_data():\n")
-    print(names(adjusted_data()))
+  # Define a sequence of beta values
+  beta_values <- seq(0, 2, by = 0.1)
+  
+  compute_correlations <- function(beta, data, metrics) {
+    # Adjust the metrics
+    adjusted_data <- data %>%
+      mutate(across(all_of(metrics), ~ .x * (Weight / mean(data$Weight)) ^ beta, .names = "Adjusted_{.col}"))
+    
+    # Compute correlations with Position
+    corr_values <- adjusted_data %>%
+      summarise(across(starts_with("Adjusted_"), ~ cor(.x, Position, method = "pearson"))) %>%
+      pivot_longer(everything(), names_to = "Metric", values_to = "Correlation")
+    
+    # Add beta value
+    corr_values$Beta <- beta
+    
+    return(corr_values)
+  }
+  
+  goodness_of_fit_data <- reactive({
+    # Use selected metrics from input
+    selected_metrics <- input$metrics
+    
+    # Initialize an empty data frame to store results
+    correlation_results <- data.frame()
+    
+    # Loop over beta values and compute correlations
+    for (beta in beta_values) {
+      corr_values <- compute_correlations(beta, data, selected_metrics)
+      correlation_results <- bind_rows(correlation_results, corr_values)
+    }
+    
+    # Clean up Metric names
+    correlation_results$Metric <- gsub("Adjusted_", "", correlation_results$Metric)
+    
+    return(correlation_results)
+  })
+  
+  # Render the plot
+  output$goodness_of_fit_plot <- renderPlot({
+    # Get the data
+    correlation_results <- goodness_of_fit_data()
+    
+    # Create the ggplot
+    ggplot(correlation_results, aes(x = Beta, y = Correlation)) +
+      geom_line(color = "steelblue") +
+      facet_wrap(~ Metric, scales = "free_y") +
+      labs(
+        title = "Goodness-of-Fit vs Beta",
+        x = "Beta (Weight Factor)",
+        y = "Correlation with Position"
+      )
   })
   
   
