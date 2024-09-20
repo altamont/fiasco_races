@@ -1,0 +1,25 @@
+# .github/workflows/deploy-qa-fiasco_races.yml
+
+name: deploy-qa-fiasco_races
+# Refer to https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+# to customize what events should trigger an application deployment
+on:
+  workflow_dispatch
+jobs:
+  deploy:
+    permissions:
+      id-token: write
+      contents: read
+    name: Zip and Upload Scaly App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Zip and Deploy to Scaly
+        uses: ./.github/actions/deploy-scaly-app
+        with:
+          scaly-account-id: b3a8adae-e146-4a8f-a718-bffdfbb81b98
+          scaly-app-name: fiasco_races
+          source-directory: './' # change to root of application code
+          scaly-env: '-qa'
+          scaly-env-id: '727125169629'
